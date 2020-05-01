@@ -14,6 +14,7 @@
 
         <div id="myChart" :style="{ height: '300px'}"></div>
         <div id="myChartMem" :style="{ height: '300px'}"></div>
+        <div id="myChartDisk" :style="{ height: '500px'}"></div>
         <div>
           <el-row>
             <span>模拟发送简单指令：</span>
@@ -36,11 +37,14 @@
     name: 'Infos',
     data() {
       return {
+        showNum: false, //控制图表上方是否显示数字
         direct: '',
         input: '',
         engkey: "",
         datax: [],
         datay: [],
+        dataDiskIng: 0,
+        dataDiskFree: 100,
         datayMem: [],
         engints: [],
         percent1: 30,
@@ -49,6 +53,7 @@
         time: "10:05:03",
         myChartCpu: null,
         myChartMem: null,
+        myChartDisk: null,
         timer: null
       }
     },
@@ -61,10 +66,10 @@
       this.getDataY(50);
       let self = this;
       axios.post("/api/email/get?engkey=" + this.engkey)
-        .then(function (response) {
+        .then(function(response) {
           self.input = response.data.emailTo
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.log(error);
         });
     },
@@ -74,19 +79,19 @@
     methods: {
       sendDirect(direct) {
         axios.post("/api/engint/send?id=" + this.engkey + "&direct=" + direct)
-          .then(function (response) {
+          .then(function(response) {
             console.log(response)
           }).catch()
       },
       mokeEmial() {
         axios.post("/api/email/send?id=" + this.engkey + "&email=" + this.input)
-          .then(function (response) {
+          .then(function(response) {
             console.log(response)
           }).catch()
       },
       updateEmail() {
         axios.post("/api/email/update?id=" + this.engkey + "&email=" + this.input)
-          .then(function (response) {
+          .then(function(response) {
             console.log(response)
           }).catch()
 
@@ -94,19 +99,37 @@
       getDataY(size) {
         let self = this;
         axios.post("/api/engint/getOneEngint?engkey=" + this.engkey + "&size=" + size)
-          .then(function (response) {
+          .then(function(response) {
             self.engints = response.data;
+
             for (let item in self.engints) {
               let number = self.engints.length - item - 1;
               self.datax.push(self.engints[item].createTime);
               self.datay.push(100 - self.engints[item].cpuing.substring(0, 2));
               let memUseable = self.engints[item].memorying.indexOf(" ");
               let memAll = (self.engints[item].memoryall).indexOf(" ");
-              let mem = self.engints[item].memorying.substring(0, memUseable) / self.engints[item].memoryall.substring(0, memAll);
+              let fixMemIng = self.engints[item].memorying.substring(0, memUseable);
+              if (fixMemIng > 500) {
+                fixMemIng = 1
+              }
+              let mem = fixMemIng / self.engints[item].memoryall.substring(
+                0, memAll);
               self.datayMem.push((100 - mem * 100 + "").substring(0, 4))
+
+
+              let diskIng = self.engints[item].disking.indexOf(" ");
+              let diskAll = (self.engints[item].diskall).indexOf(" ");
+              self.dataDiskFree = self.engints[item].disking.substring(0, diskIng);
+              let dataDiskAll = self.engints[item].diskall.substring(0, diskAll);
+              if (self.dataDiskFree > dataDiskAll) {
+                dataDiskAll = dataDiskAll * 1024
+              }
+              self.dataDiskIng = (dataDiskAll - self.dataDiskFree).toFixed(2)
+              
+
             }
           })
-          .catch(function (error) {
+          .catch(function(error) {
             console.log(error);
           });
       },
@@ -131,6 +154,12 @@
             itemStyle: {
               color: '#00ff00'
             },
+            label: {
+              normal: { //展示数字和位置
+                show: self.showNum,
+                position: 'top'
+              }
+            },
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
                 offset: 0,
@@ -146,6 +175,7 @@
         };
 
         let optionMem = {
+
           title: {
             text: '动态内存使用率'
           },
@@ -157,12 +187,19 @@
           },
           yAxis: {
             type: 'value',
-            max: 100
+            max: 100,
+            min: 0
 
           },
           series: [{
             itemStyle: {
               color: '#00ff00'
+            },
+            label: {
+              normal: { //展示数字 ，及展示位置
+                show: self.showNum,
+                position: 'top'
+              }
             },
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
@@ -177,11 +214,52 @@
             type: 'line',
           }]
         };
+
+        let optionDisk = {
+          title: {
+            text: '客户端磁盘状况',
+            left: 'center'
+          },
+          legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: ['使用总量', '空闲总量']
+          },
+          series: [{
+            label: {
+              normal: { //展示数字 ，及展示位置
+                formatter: ' {b}：{c} 百分比：{d}% ',
+                backgroundColor: '#eee',
+                borderColor: '#aaa',
+                borderWidth: 1,
+                padding: [7, 7],
+                borderRadius: 4,
+              }
+            },
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '60%'],
+            data: [{
+                value: self.dataDiskIng,
+                name: '使用总量'
+              },
+              {
+                value: self.dataDiskFree,
+                name: '空闲总量'
+              }
+            ],
+
+          }]
+        };
+
+
         self.myChartCpu = echarts.init(document.getElementById('myChart'));
         self.myChartMem = echarts.init(document.getElementById('myChartMem'));
+        self.myChartDisk = echarts.init(document.getElementById('myChartDisk'));
         self.myChartCpu.setOption(option);
         self.myChartMem.setOption(optionMem);
-        self.timer = setInterval(function () {
+        self.myChartDisk.setOption(optionDisk);
+        self.timer = setInterval(function() {
           self.getDataY(1);
           self.myChartCpu.setOption({
             series: [{
@@ -192,6 +270,20 @@
               boundaryGap: false,
               data: self.datax,
             },
+          });
+          self.myChartDisk.setOption({
+            series: [{
+              data: [{
+                  value: self.dataDiskIng,
+                  name: '使用总量'
+                },
+                {
+                  value: self.dataDiskFree,
+                  name: '空闲总量'
+                }
+              ],
+            }]
+
           });
           self.myChartMem.setOption({
             series: [{
@@ -226,8 +318,7 @@
     clear: both
   }
 
-  .card_body {
-  }
+  .card_body {}
 
   .box-card {
     margin-top: 10px;
