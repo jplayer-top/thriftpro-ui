@@ -1,14 +1,34 @@
 <template>
   <div class="hello">
     <el-card class="box-card">
+
       <div slot="header" class="clearfix">
-        <span>所有客户端</span>
+        <span style="font-size: large;">客户端列表</span>
       </div>
-      <el-card v-for="o in engints" :key="o.engkey" class="text item">
+      <!-- <el-card v-for="o in engints" :key="o.engkey" class="text item">
         <div class="span_item" v-on:click="toNext(o)"> {{'客户端： ' + o.engkey }}
-            <el-button class="btn_item">查看详情</el-button>
+          <el-button class="btn_item">查看详情</el-button>
         </div>
-      </el-card>
+      </el-card> -->
+      <el-table :data="engints" border style="width: 100%">
+        <el-table-column fixed prop="num" label="序号" width="50">
+        </el-table-column>
+        <el-table-column prop="engkey" label="客户端机器码">
+        </el-table-column>
+        <el-table-column prop="cpuing" label="CPU空闲率">
+        </el-table-column>
+        <el-table-column prop="memie" label="内存空闲率">
+        </el-table-column>
+        <el-table-column prop="diskie" label="磁盘">
+        </el-table-column>
+        <el-table-column prop="createTime" label="最近时间">
+        </el-table-column>
+        <el-table-column label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button @click="toNext(scope.row)" type="text">查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-card>
   </div>
 </template>
@@ -28,17 +48,22 @@
       let self = this;
       // 为给定 ID 的 user 创建请求
       axios.post('/api/engint/getAllEngint')
-        .then(function (response) {
+        .then(function(response) {
           self.engints = response.data;
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.log(error);
         });
     },
     methods: {
       toNext(event) {
         //带参数跳转
-        this.$router.push({path:'/infos',query:{engkey:event.engkey}});
+        this.$router.push({
+          path: '/infos',
+          query: {
+            engkey: event.engkey
+          }
+        });
       }
     }
   }
@@ -55,9 +80,7 @@
     width: 100%;
   }
 
-  .hello {
-
-  }
+  .hello {}
 
   .text {
     font-size: 14px;
@@ -67,16 +90,6 @@
     justify-content: center;
     display: flex;
     margin-bottom: 18px;
-  }
-
-  .clearfix:before,
-  .clearfix:after {
-    display: table;
-    content: "";
-  }
-
-  .clearfix:after {
-    clear: both
   }
 
   .box-card {

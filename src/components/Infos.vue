@@ -112,8 +112,7 @@
               if (fixMemIng > 500) {
                 fixMemIng = 1
               }
-              let mem = fixMemIng / self.engints[item].memoryall.substring(
-                0, memAll);
+              let mem = fixMemIng / self.engints[item].memoryall.substring(0, memAll);
               self.datayMem.push((100 - mem * 100 + "").substring(0, 4))
 
 
@@ -121,11 +120,10 @@
               let diskAll = (self.engints[item].diskall).indexOf(" ");
               self.dataDiskFree = self.engints[item].disking.substring(0, diskIng);
               let dataDiskAll = self.engints[item].diskall.substring(0, diskAll);
-              if (self.dataDiskFree > dataDiskAll) {
+              if (Number(self.dataDiskFree) > Number(dataDiskAll)) {
                 dataDiskAll = dataDiskAll * 1024
               }
               self.dataDiskIng = (dataDiskAll - self.dataDiskFree).toFixed(2)
-              
 
             }
           })
