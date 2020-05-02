@@ -1,32 +1,44 @@
 <template>
   <div class="hello">
-    <el-card class="box-card">
-      <div slot="header" class="clearfix">
-        <div>
-          <span>客户端：{{engkey}}</span>
-          <el-input class="emailto" v-model="input" placeholder="要更改的预警邮箱地址"></el-input>
-          <el-button @click="updateEmail()">更改邮箱</el-button>
-          <el-button @click="mokeEmial()">模拟预警</el-button>
-        </div>
+    <el-container>
+      <el-header style="background: #5CACEE;">
 
-      </div>
-      <div class="card_body">
-
-        <div id="myChart" :style="{ height: '300px'}"></div>
-        <div id="myChartMem" :style="{ height: '300px'}"></div>
-        <div id="myChartDisk" :style="{ height: '500px'}"></div>
-        <div>
-          <el-row>
-            <span>模拟发送简单指令：</span>
-            <el-button @click="sendDirect('mk')">创建</el-button>
-            <el-button @click="sendDirect('cp')" type="primary">拷贝</el-button>
-            <el-button @click="sendDirect('mv')" type="success">移动</el-button>
-            <el-button @click="sendDirect('rm')" type="danger">删除</el-button>
-          </el-row>
+        <div class="header_top">
+          <span style="width: 90%;color: #FFFFFF;">服务器监控系统</span>
+          <img style="width: 2rem; height: 2rem;" src="../assets/logo.png" />
         </div>
-      </div>
-    </el-card>
-  </div>
+      </el-header>
+      <el-main>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+              <div>
+                <span>客户端：{{engkey}}</span>
+                <el-input class="emailto" v-model="input" placeholder="要更改的预警邮箱地址"></el-input>
+                <el-button @click="updateEmail()">更改邮箱</el-button>
+                <el-button @click="mokeEmial()">模拟预警</el-button>
+              </div>
+
+            </div>
+            <div class="card_body">
+
+              <div id="myChart" :style="{ height: '300px'}"></div>
+              <div id="myChartMem" :style="{ height: '300px'}"></div>
+              <div id="myChartDisk" :style="{ height: '500px'}"></div>
+              <div>
+                <el-row>
+                  <span>模拟发送简单指令：</span>
+                  <el-button @click="sendDirect('mk')">创建</el-button>
+                  <el-button @click="sendDirect('cp')" type="primary">拷贝</el-button>
+                  <el-button @click="sendDirect('mv')" type="success">移动</el-button>
+                  <el-button @click="sendDirect('rm')" type="danger">删除</el-button>
+                </el-row>
+              </div>
+            </div>
+          </el-card>
+
+      </el-main>
+   </el-container>
+   </div>
 </template>
 
 <script>
@@ -319,8 +331,6 @@
   .card_body {}
 
   .box-card {
-    margin-top: 10px;
-    margin-left: 5%;
-    width: 90%;
+    width: 100%;
   }
 </style>
